@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 
-class UsersController extends Controller
+class DiagnosticsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::query('SELECT * FROM users')->paginate(10);
-        return view('admin.users.index', compact('users'));
+        //
     }
 
     /**
@@ -21,7 +19,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('admin.users.create');
+        //
     }
 
     /**

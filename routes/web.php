@@ -1,42 +1,50 @@
 <?php
 
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\TasksController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\ClientsController;
+use App\Http\Controllers\DiagnosticsController;
+use App\Http\Controllers\ProposalsController;
+use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\ActiveClientsController;
+use App\Http\Controllers\LostClientsController;
+use App\Http\Controllers\NotesController;
+
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('auth.login');
 });
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
 // Rotas de autenticação
-Route::prefix('auth')->group(function () {
-    Route::get('/login', 'AuthController@login')->name('login');
-    Route::post('/login', 'AuthController@authenticate');
-    Route::get('/logout', 'AuthController@logout')->name('logout');
-    Route::get('/forgot-password', 'AuthController@reset-password')->name('reset-password');
-    Route::post('/forgot-password', 'AuthController@send-reset-password-link');
+Route::prefix('auth')->name('auth.')->group(function () {
+    Route::get('/login', [AuthController::class, 'index'])->name('login');
+    Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate')    ;
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/forgot-password', [AuthController::class, 'resetPassword'])->name('reset.password');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetPasswordEmail'])->name('reset.password.send.email');
 });
 
 // Rotas Administrador
-Route::prefix('admin')->group(function () {
-    Route::resource('/users', 'UsersController')->name('users');
-    Route::resource('/config', 'ConfigController')->name('config');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('/users', UsersController::class);
+    Route::resource('/config', ConfigController::class);
 });
 
-Route::prefix('leads')->group(function () {
-    Route::resource('/clients', 'ClientsController')->name('clients');
-    Route::resource('/diagnostics', 'DiagnosticsController')->name('diagnostics');
-    Route::resource('/proposals', 'ProposalsController')->name('proposals');
-    Route::resource('/contract', 'ContractsController')->name('contracts');
-    Route::resource('/actives', 'ActiveClientsController')->name('active-clients');
-    Route::resource('/losts', 'LostClientsController')->name('lost-clients');
-    Route::resource('/notes', 'NotesController')->name('notes');
-    Route::resource('/tasks', 'ProposalsController')->name('tasks');
+Route::prefix('leads')->name('leads.')->group(function () {
+    Route::resource('/clients', ClientsController::class);
+    Route::resource('/diagnostics', DiagnosticsController::class);
+    Route::resource('/proposals', ProposalsController::class);
+    Route::resource('/contract', ContractsController::class);
+    Route::resource('/actives', ActiveClientsController::class);
+    Route::resource('/losts', LostClientsController::class);
+    Route::resource('/notes', NotesController::class);
+    Route::resource('/tasks', TasksController::class);
 });
 
-Route::prefix('dashboard')->group(function () {
-    Route::resource('/reports', 'LeadsController')->name('reports');
-    Route::resource('/notes', 'ProposalsController')->name('notes');
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::resource('/reports', ReportsController::class);
 });
