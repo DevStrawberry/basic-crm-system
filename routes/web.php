@@ -21,10 +21,22 @@ Route::prefix('auth')->group(function () {
 
 // Rotas Administrador
 Route::prefix('admin')->group(function () {
-    Route::prefix('users')->group(function () {
-        Route::resource('/', 'UsersController');
-    });
-    Route::prefix('config')->group(function () {
-        Route::resource('/', 'ConfigController');
-    });
+    Route::resource('/users', 'UsersController')->name('users');
+    Route::resource('/config', 'ConfigController')->name('config');
+});
+
+Route::prefix('leads')->group(function () {
+    Route::resource('/clients', 'ClientsController')->name('clients');
+    Route::resource('/diagnostics', 'DiagnosticsController')->name('diagnostics');
+    Route::resource('/proposals', 'ProposalsController')->name('proposals');
+    Route::resource('/contract', 'ContractsController')->name('contracts');
+    Route::resource('/actives', 'ActiveClientsController')->name('active-clients');
+    Route::resource('/losts', 'LostClientsController')->name('lost-clients');
+    Route::resource('/notes', 'NotesController')->name('notes');
+    Route::resource('/tasks', 'ProposalsController')->name('tasks');
+});
+
+Route::prefix('dashboard')->group(function () {
+    Route::resource('/reports', 'LeadsController')->name('reports');
+    Route::resource('/notes', 'ProposalsController')->name('notes');
 });
