@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('contact_sources', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('description');
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('contact_sources');
         Schema::enableForeignKeyConstraints();
     }
 };

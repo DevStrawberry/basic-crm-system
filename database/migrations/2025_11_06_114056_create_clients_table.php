@@ -11,17 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            $table->string('cpf');
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->boolean('status')->default(false);
-            $table->timestamps();
-            $table->foreignId('role_id')
-                ->constrained('roles')
+            $table->string('email');
+            $table->string('phone');
+            $table->string('address');
+            $table->string('city');
+            $table->string('state');
+            $table->foreignId('owner_user_id')
+                ->constrained('users')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
+            $table->foreignId('contact_source_id')
+                ->constrained('contact_sources')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
+            $table->timestamps();
             $table->softDeletes();
         });
     }
@@ -32,7 +39,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('clients');
         Schema::enableForeignKeyConstraints();
     }
 };

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SocialNetwork;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,8 +18,12 @@ class DatabaseSeeder extends Seeder
     {
         // Ordem de execução
         $this->call([
-            RolesTableSeeder::class,
-            UsersTableSeeder::class
+            RolesSeeder::class,
+            ContractSourcesSeeder::class,
+            LostReasonsSeeder::class,
+            PipelineStagesSeeder::class,
+            SocialNetworksSeeder::class,
+            UsersSeeder::class
         ]);
     }
 }
