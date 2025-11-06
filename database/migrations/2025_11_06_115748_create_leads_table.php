@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->string('estimated_value');
+            $table->float('estimated_value');
             $table->boolean('is_won')->default(false);
             $table->foreignId('client_id')
                 ->constrained('clients')
@@ -33,8 +33,9 @@ return new class extends Migration
                 ->constrained('lost_reasons')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->timestamps();
+            $table->enum('interest_levels', ['Frio', 'Morno', 'Quente'])->default('Morno');
             $table->date('closed_at')->nullable();
+            $table->timestamps();
             $table->softDeletes();
         });
     }

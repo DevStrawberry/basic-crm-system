@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use \Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Client extends Model
@@ -27,8 +29,14 @@ class Client extends Model
         return $this->belongsTo(User::class, 'owner_user_id');
     }
 
-    public function contactSource(): BelongsTo {
-        return $this->belongsTo(ContactSource::class, 'contact_source_id');
+    public function contactSource(): HasOne {
+        return $this->hasOne(ContactSource::class, 'contact_source_id');
+    }
+
+    public function socialNetworks(): belongsToMany
+    {
+        return $this->belongsToMany(SocialNetwork::class, 'client_social_network')
+            ->withPivot('profile_url');
     }
 
     public function attachments(): MorphMany

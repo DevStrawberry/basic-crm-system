@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->boolean('status')->default(false);
-            $table->foreignId('role_id')
-                ->constrained('roles')
+        Schema::create('client_social_network', function (Blueprint $table) {
+            $table->primary(['client_id', 'social_network_id']);
+            $table->foreignId('client_id')
+                ->constrained('clients')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
+            $table->foreignId('social_network_id')
+                ->constrained('social_networks')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
+            $table->string('profile_url');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -32,7 +32,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('client_social_network');
         Schema::enableForeignKeyConstraints();
     }
 };
