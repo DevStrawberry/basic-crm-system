@@ -22,11 +22,13 @@ return new class extends Migration
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->string('title');
-            $table->text('body');
+            $table->text('service_description');
+            $table->text('warranties');
             $table->float('total_value');
             $table->date('valid_until');
             $table->enum('status', ['Draft', 'Enviada', 'Aceita', 'Rejeitada'])->default('Draft');
             $table->date('sent_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

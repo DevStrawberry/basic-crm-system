@@ -14,11 +14,13 @@ class Proposal extends Model
         'lead_id',
         'created_by',
         'title',
-        'body',
+        'service_description',
+        'warranties',
         'total_value',
         'valid_until',
         'status',
-        'sent_at'
+        'sent_at',
+        'notes'
     ];
 
     public function lead(): BelongsTo {

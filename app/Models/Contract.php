@@ -13,6 +13,9 @@ class Contract extends Model
     protected $fillable = [
         'lead_id',
         'proposal_id',
+        'contract_number',
+        'final_value',
+        'payment_method',
         'signed_by',
         'signed_at',
         'file_path'

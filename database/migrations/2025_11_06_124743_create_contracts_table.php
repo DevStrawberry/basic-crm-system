@@ -21,6 +21,9 @@ return new class extends Migration
                 ->constrained('proposals')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
+            $table->integer('contract_number');
+            $table->float('final_value');
+            $table->float('payment_method');
             $table->string('signed_by')->nullable();
             $table->date('signed_at')->nullable();
             $table->string('file_path')->nullable();
