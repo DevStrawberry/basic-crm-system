@@ -12,9 +12,21 @@
             </a>
         </div>
 
+        {{-- Mensagens de sucesso --}}
         @if(session('success'))
             <div class="bg-green-50 border border-green-200 text-green-700 px-5 py-3 rounded-xl mb-6 text-sm font-medium">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Mensagens de erro --}}
+        @if($errors->any())
+            <div style="color: red;">
+                <ul>
+                    @foreach($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -36,11 +48,11 @@
                     <td class="px-6 py-4 font-medium">{{ $user->name }}</td>
                     <td class="px-6 py-4">{{ $user->email }}</td>
                     <td class="px-6 py-4">{{ $user->role['name'] }}</td>
-                    <td class="px-6 py-4">{{ $user->status == 0 ? 'Inativo' : 'Ativo' }}</td>
+                    <td class="px-6 py-4">{{ $user->status == 'inactive' ? 'Inativo' : 'Ativo' }}</td>
                     <td class="px-6 py-4 text-right space-x-2">
-                        <a href="{{ route('admin.users.edit', $user) }}"
+                        <a href="{{ route('admin.users.edit', $user->id) }}"
                            class="text-yellow-600 hover:text-yellow-800 font-semibold">Editar</a>
-                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit"

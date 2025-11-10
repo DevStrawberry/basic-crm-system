@@ -13,26 +13,30 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Nome</label>
                 <input type="text" name="name" value="{{ old('name') }}" required
                        class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3">
-                @error('nome') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                @error('nome')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">E-mail</label>
                 <input type="email" name="email" value="{{ old('email') }}" required
                        class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3">
-                @error('email') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                @error('email')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Perfil</label>
-                <select name="perfil" required
+                <select name="role_id" required
                         class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 text-gray-800 shadow-sm">
                     <option value="">Selecione o perfil</option>
-                    <option value="Administrador" {{ old('perfil') == 'Administrador' ? 'selected' : '' }}>Administrador</option>
-                    <option value="Gestor" {{ old('perfil') == 'Gestor' ? 'selected' : '' }}>Gestor</option>
-                    <option value="Assessor" {{ old('perfil') == 'Assessor' ? 'selected' : '' }}>Assessor</option>
+                    {% @foreach($roles as $role) %}
+                        <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
+                    {% @endforeach %}
                 </select>
-                @error('perfil')
+                @error('role_id')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>

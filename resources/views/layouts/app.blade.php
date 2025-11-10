@@ -15,10 +15,10 @@
 
         @auth
             <div class="flex items-center space-x-6">
-                <a href="" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                <a href="{{ route('leads.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
                     Leads
                 </a>
-                <form method="POST" action="" class="inline">
+                <form method="POST" action="{{ route('auth.logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="text-red-500 hover:text-red-700 font-semibold transition duration-200 ease-in-out bg-transparent border-none p-0 cursor-pointer">
                         Sair

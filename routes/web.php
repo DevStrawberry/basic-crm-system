@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LeadsController;
@@ -24,34 +25,52 @@ Route::get('/', function () {
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::get('login', [AuthController::class, 'index'])->name('login');
     Route::post('login', [AuthController::class, 'authenticate'])->name('authenticate')    ;
-    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('forgot-password', [AuthController::class, 'resetPassword'])->name('reset.password');
     Route::post('forgot-password', [AuthController::class, 'sendResetPasswordEmail'])->name('reset.password.send.email');
+    Route::get('change-password', [AuthController::class, 'showChangePasswordForm'])->name('change.password');
+    Route::post('change-password', [AuthController::class, 'updatePassword'])->name('change.password.update');
 });
 
 // Rotas Administrador
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UsersController::class);
-    Route::resource('config', ConfigController::class);
+Route::middleware(['auth', 'force.password.change', 'role:administrador'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('dashboard', DashboardController::class);
+        Route::resource('users', UsersController::class);
+        Route::resource('config', ConfigController::class);
 });
 
-// Rota para cadastro de clientes
-Route::resource('clients', ClientsController::class);
 
-// Rotas para cadastro de leads
-Route::resource('leads', LeadsController::class);
 
-// Rotas para gerenciar leads específicas
-Route::prefix('leads/{lead_id}')->name('leads.')->group(function () {
-    Route::resource('diagnostics', DiagnosticsController::class);
-    Route::resource('proposals', ProposalsController::class);
-    Route::resource('contract', ContractsController::class);
-    Route::resource('actives', ActiveClientsController::class);
-    Route::resource('losts', LostClientsController::class);
-    Route::resource('notes', NotesController::class);
-    Route::resource('tasks', TasksController::class);
-});
+Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->group(function () {
+    // Rotas dashboard, páginas iniciais depois do login
+    Route::resource('dashboard', DashboardController::class);
 
-Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    // Rotas de relatórios
     Route::resource('reports', ReportsController::class);
+
+    // Rota para cadastro de clientes
+    Route::resource('clients', ClientsController::class);
+
+    // Rotas para cadastro de leads
+    Route::resource('leads', LeadsController::class);
+
+    // Rotas para gerenciar leads específicas
+    Route::prefix('leads/{lead_id}')->name('leads.')->group(function () {
+        Route::resource('diagnostics', DiagnosticsController::class);
+        Route::resource('proposals', ProposalsController::class);
+        Route::resource('contract', ContractsController::class);
+        Route::resource('actives', ActiveClientsController::class);
+        Route::resource('losts', LostClientsController::class);
+        Route::resource('notes', NotesController::class);
+        Route::resource('tasks', TasksController::class);
+    });
 });
+
+
+
+
+
+

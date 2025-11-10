@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserCreatedMail;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UsersController extends Controller
 {
@@ -21,7 +26,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('admin.users.create');
+        $roles = Role::all();
+        return view('admin.users.create', compact('roles'));
     }
 
     /**
@@ -29,7 +35,24 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $params = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        // Gera uma senha de 10 caracteres aleatórios
+        $password = Str::random(10);
+        $params['password'] = Hash::make($password);
+
+        // Insere no banco
+        $user = User::create($params);
+
+        // Envia email com usuário e senha aleatória
+        Mail::to($user->email)->send(new UserCreatedMail($user, $password));
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Usuário cadastrado com sucesso');
     }
 
     /**
@@ -45,7 +68,10 @@ class UsersController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = User::query()->findOrFail($id);
+        $roles = Role::all();
+
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -53,7 +79,19 @@ class UsersController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = User::query()->findOrFail($id);
+
+        $params = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role_id' => 'required|exists:roles,id',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $user->update($params);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Usuário atualizado com sucesso');
     }
 
     /**
