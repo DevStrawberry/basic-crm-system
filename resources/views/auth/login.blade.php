@@ -8,6 +8,12 @@
             Acesse sua conta
         </h2>
 
+        @if (session('success'))
+            <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-xl border border-green-300">
+                {{ session('success') }}
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-xl border border-red-300">
                 @foreach ($errors->all() as $error)
