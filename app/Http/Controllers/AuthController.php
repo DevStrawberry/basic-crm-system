@@ -79,12 +79,11 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->password = Hash::make($request->password);
         $user->must_change_password = false;
-        $user->status = 'active';
         $user->save();
 
         $role = strtolower($user->role?->name ?? '');
 
-        if($role == 'gestor' || $role == 'assessor'){
+        if(in_array($role, ['gestor', 'assessor'])){
             return redirect()->route('dashboard.index')
                 ->with('success', 'Senha alterada com sucesso!');
         } elseif ($role == 'administrador') {
