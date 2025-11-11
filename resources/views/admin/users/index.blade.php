@@ -4,27 +4,57 @@
 
 @section('content')
     <div class="w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
-        <div class="flex items-center justify-between mb-8">
+        {{-- Cabeçalho --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 space-y-4 md:space-y-0">
             <h2 class="text-3xl font-extrabold text-gray-900">Usuários</h2>
-            <a href="{{ route('admin.users.create') }}"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition">
-                + Adicionar Usuário
-            </a>
+            <div class="flex items-center space-x-3">
+                <span>Filtros: </span>
+                <form method="GET" action="{{ route('admin.users.index') }}" class="flex items-center space-x-2">
+                    {{-- Campo de busca --}}
+                    <input type="text" name="search" placeholder="Digite nome ou e-mail"
+                           value="{{ request('search') }}"
+                           class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+
+                    {{-- Filtro por status --}}
+                    <select name="status" onchange="this.form.submit()"
+                            class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Ativo</option>
+                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inativo</option>
+                    </select>
+
+                    {{-- Filtro por perfil (role) --}}
+                    <select name="role_id" onchange="this.form.submit()"
+                            class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Perfil</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>
+                                {{ $role->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+
+                {{-- Botão adicionar usuário --}}
+                <a href="{{ route('admin.users.create') }}"
+                   class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition">
+                    + Adicionar Usuário
+                </a>
+            </div>
         </div>
 
-        {{-- Mensagens de sucesso --}}
+        {{-- Mensagens --}}
         @if(session('success'))
             <div class="bg-green-50 border border-green-200 text-green-700 px-5 py-3 rounded-xl mb-6 text-sm font-medium">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Mensagens de erro --}}
         @if($errors->any())
-            <div style="color: red;">
-                <ul>
-                    @foreach($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
+            <div class="text-red-600 mb-4">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
@@ -48,7 +78,11 @@
                     <td class="px-6 py-4 font-medium">{{ $user->name }}</td>
                     <td class="px-6 py-4">{{ $user->email }}</td>
                     <td class="px-6 py-4">{{ $user->role['name'] }}</td>
-                    <td class="px-6 py-4">{{ $user->status == 'inactive' ? 'Inativo' : 'Ativo' }}</td>
+                    <td class="px-6 py-4">
+                        <span class="{{ $user->status == 'inactive' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold' }}">
+                            {{ $user->status == 'inactive' ? 'Inativo' : 'Ativo' }}
+                        </span>
+                    </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="{{ route('admin.users.edit', $user->id) }}"
                            class="text-yellow-600 hover:text-yellow-800 font-semibold">Editar</a>
@@ -63,12 +97,17 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-6 text-center text-gray-500 italic">
-                        Nenhum usuário cadastrado.
+                    <td colspan="6" class="px-6 py-6 text-center text-gray-500 italic">
+                        Nenhum usuário encontrado.
                     </td>
                 </tr>
             @endforelse
             </tbody>
         </table>
+
+        {{-- Paginação --}}
+        <div class="mt-6">
+            {{ $users->appends(request()->query())->links() }}
+        </div>
     </div>
 @endsection

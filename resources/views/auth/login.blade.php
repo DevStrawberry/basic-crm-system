@@ -8,9 +8,11 @@
             Acesse sua conta
         </h2>
 
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 px-5 py-3 rounded-xl mb-6 text-sm font-medium">
-                {{ session('error') }}
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-xl border border-red-300">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
             </div>
         @endif
 

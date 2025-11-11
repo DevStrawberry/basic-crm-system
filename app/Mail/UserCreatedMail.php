@@ -11,8 +11,8 @@ class UserCreatedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
-    public $password;
+    private $user;
+    private $password;
 
     public function __construct(User $user, string $password)
     {
@@ -23,6 +23,6 @@ class UserCreatedMail extends Mailable
     public function build()
     {
         return $this->subject('Seu usuário foi criado')
-            ->view('emails.user_created');
+            ->view('emails.user-created', ['user' => $this->user, 'password' => $this->password]);
     }
 }

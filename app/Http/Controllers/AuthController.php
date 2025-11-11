@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -32,15 +35,19 @@ class AuthController extends Controller
             if ($role == 'administrador') {
                 return redirect()->route('admin.dashboard.index');
             }
-            if ($role == 'gestor' || $role == 'assessor') {
+            if (in_array($role,['gestor', 'assessor'])) {
                 return redirect()->route('dashboard.index');
             }
+        }
 
-            return redirect('/');
+        if (!User::where('email', $credentials['email'])->exists()) {
+            return back()->withErrors([
+                'login' => 'Usuário não encontrado'
+            ])->onlyInput('email');
         }
 
         return back()->withErrors([
-            'email' => 'Credenciais inválidas',
+            'login' => 'Credenciais inválidas'
         ])->onlyInput('email');
     }
 
@@ -55,12 +62,12 @@ class AuthController extends Controller
     }
 
     public function resetPassword(Request $request) {
-
+        return view('auth.reset-password');
     }
 
     public function showChangePasswordForm()
     {
-        return view('auth.change_password');
+        return view('auth.change-password');
     }
 
     public function updatePassword(Request $request)
@@ -70,9 +77,9 @@ class AuthController extends Controller
         ]);
 
         $user = Auth::user();
-        $user['password'] = Hash::make($request->password);
-        $user['must_change_password'] = false;
-        $user['status'] = true;
+        $user->password = Hash::make($request->password);
+        $user->must_change_password = false;
+        $user->status = 'active';
         $user->save();
 
         $role = strtolower($user->role?->name ?? '');
@@ -90,6 +97,25 @@ class AuthController extends Controller
 
 
     public function sendResetPasswordEmail(Request $request) {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+        ]);
 
+        $user = User::where('email', $request->email)->first();
+
+        if(!$user) {
+            return back()->withErrors(['email' => 'Usuário não encontrado']);
+        }
+
+        $tempPassword = Str::random(10);
+        $user->password = Hash::make($tempPassword);
+        $user->must_change_password = true;
+        $user->save();
+
+        // Envia e-mail
+        Mail::to($user->email)->send(new ResetPasswordMail($user, $tempPassword));
+
+        return redirect()->route('auth.login')
+            ->with('success', 'Senha temporária enviada para seu e-mail');
     }
 }

@@ -12,12 +12,12 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $role = strtolower($user->role?->name);
 
         if ($role == 'administrador') {
             return view('admin.dashboard.index');
-        } elseif ($role == 'gestor' || $role == 'assessor') {
+        } elseif (in_array($role, ['gestor', 'assessor'])) {
             return view('dashboard.index');
         }
 
