@@ -8,7 +8,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TasksController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\ProposalsController;
@@ -39,9 +39,8 @@ Route::middleware(['auth', 'force.password.change', 'role:administrador'])
     ->group(function () {
         Route::resource('dashboard', DashboardController::class);
         Route::resource('users', UsersController::class);
-        Route::resource('config', ConfigController::class);
+        Route::resource('settings', SettingsController::class);
 });
-
 
 
 Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->group(function () {
