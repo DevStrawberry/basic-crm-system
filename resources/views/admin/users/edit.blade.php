@@ -75,7 +75,7 @@
             </div>
 
             <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer">
                 Atualizar Usuário
             </button>
         </form>

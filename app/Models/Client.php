@@ -29,6 +29,10 @@ class Client extends Model
         return $this->belongsTo(User::class, 'owner_user_id');
     }
 
+    public function leads(): HasMany {
+        return $this->hasMany(Lead::class, 'client_id');
+    }
+
     public function contactSource(): HasOne {
         return $this->hasOne(ContactSource::class, 'contact_source_id');
     }

@@ -56,6 +56,9 @@ Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->gr
     // Rotas para cadastro de leads
     Route::resource('leads', LeadsController::class);
 
+    // Rotas para tarefas
+    Route::resource('tasks', TasksController::class);
+
     // Rotas para gerenciar leads específicas
     Route::prefix('leads/{lead_id}')->name('leads.')->group(function () {
         Route::resource('diagnostics', DiagnosticsController::class);
@@ -64,7 +67,6 @@ Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->gr
         Route::resource('actives', ActiveClientsController::class);
         Route::resource('losts', LostClientsController::class);
         Route::resource('notes', NotesController::class);
-        Route::resource('tasks', TasksController::class);
     });
 });
 

@@ -15,9 +15,30 @@
 
         @auth
             <div class="flex items-center space-x-6">
-                <a href="{{ route('leads.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
-                    Leads
-                </a>
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Home
+                    </a>
+                    <a href="{{ route('admin.users.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Usuários
+                    </a>
+                    <a href="{{ route('admin.settings.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Configurações
+                    </a>
+                @else
+                    <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Home
+                    </a>
+                    <a href="{{ route('clients.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Clientes
+                    </a>
+                    <a href="{{ route('leads.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Leads
+                    </a>
+                    <a href="{{ route('tasks.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold transition duration-200 ease-in-out">
+                        Minhas tarefas
+                    </a>
+                @endif
                 <form method="POST" action="{{ route('auth.logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="text-red-500 hover:text-red-700 font-semibold transition duration-200 ease-in-out bg-transparent border-none p-0 cursor-pointer">

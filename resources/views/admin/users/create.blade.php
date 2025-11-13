@@ -1,10 +1,27 @@
 @extends('layouts.app')
 
-@section('title', 'CRM - Novo Cliente')
+@section('title', 'CRM - Novo Usuário')
 
 @section('content')
     <div class="w-full max-w-lg mx-auto bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
         <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-10">Cadastrar Novo Usuário</h2>
+
+        {{-- Mensagens --}}
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-5 py-3 rounded-xl mb-6 text-sm font-medium">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="text-red-600 mb-4">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-6 space-x-6 justify-center">
             @csrf
@@ -42,7 +59,7 @@
             </div>
 
             <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer">
                 Cadastrar Usuário
             </button>
         </form>

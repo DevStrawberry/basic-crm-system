@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -69,7 +70,12 @@ class UsersController extends Controller
 
         if($user) {
             // Envia email com usuário e senha aleatória
-            Mail::to($user->email)->send(new UserCreatedMail($user, $password));
+            try {
+                Mail::to($user->email)->send(new UserCreatedMail($user, $password));
+            } catch (\Exception $exception) {
+                Log::log('Error', $exception->getMessage());
+                return back()->withErrors(['error' => 'Falha no envio do e-mail ao usuário']);
+            }
 
             return redirect()->route('admin.users.index')
                 ->with('success', 'Usuário cadastrado com sucesso');
