@@ -83,16 +83,41 @@
                             {{ $user->status == 'inactive' ? 'Inativo' : 'Ativo' }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <a href="{{ route('admin.users.edit', $user->id) }}"
-                           class="text-yellow-600 hover:text-yellow-800 font-semibold">Editar</a>
-                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm('Tem certeza que deseja excluir este usuário? Essa ação não pode ser desfeita')"
-                                    class="text-red-600 hover:text-red-800 font-semibold cursor-pointer">Excluir</button>
-                        </form>
+
+                    {{-- Icones de ações --}}
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end space-x-3">
+
+                            {{-- Editar --}}
+                            <a href="{{ route('admin.users.edit', $user->id) }}"
+                               class="text-yellow-600 hover:text-yellow-800 cursor-pointer" title="Editar">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16.862 4.487l1.687-1.688a2.121 2.121 0 113
+                         3L12 15l-4 1 1-4 7.862-7.513z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M18 14v6H6v-6" />
+                                </svg>
+                            </a>
+
+                            {{-- Excluir --}}
+                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                  class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 cursor-pointer" title="Excluir">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                         stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty

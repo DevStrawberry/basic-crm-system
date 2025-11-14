@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'CRM - Novo Cliente')
+@section('title', 'CRM - Editar Cliente')
 
 @section('content')
     <div class="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
-        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-10">Cadastrar Novo Cliente</h2>
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-10">{{ $client->name }}</h2>
 
         {{-- Mensagens --}}
         @if(session('success'))
@@ -23,14 +23,15 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('clients.store') }}" class="space-y-6">
+        <form method="POST" action="{{ route('clients.update', $client->id) }}" class="space-y-6">
             @csrf
+            @method('PUT')
 
             {{-- CPF e Nome --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">CPF</label>
-                    <input type="text" id="cpf" name="cpf" value="{{ old('cpf') }}" required
+                    <input type="text" id="cpf" name="cpf" value="{{ preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4',$client->cpf) }}" required
                            class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                     @error('cpf')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -39,7 +40,7 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nome</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required
+                    <input type="text" name="name" value="{{ $client->name }}" required
                            class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                     @error('name')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -51,7 +52,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">E-mail</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required
+                    <input type="email" name="email" value="{{ $client->email }}" required
                            class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                     @error('email')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -60,7 +61,7 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Telefone</label>
-                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}" required
+                    <input type="text" id="phone" name="phone" value="{{ preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $client->phone) }}" required
                            class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                     @error('phone')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -71,7 +72,7 @@
             {{-- Endereço, Cidade, Estado --}}
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Endereço</label>
-                <input type="text" name="address" value="{{ old('address') }}" required
+                <input type="text" name="address" value="{{ $client->address }}" required
                        class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                 @error('address')
                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -81,7 +82,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Cidade</label>
-                    <input type="text" name="city" value="{{ old('city') }}" required
+                    <input type="text" name="city" value="{{ $client->city }}" required
                            class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 shadow-sm">
                     @error('city')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -102,7 +103,7 @@
                             'RS' => 'Rio Grande do Sul', 'RO' => 'Rondônia', 'RR' => 'Roraima', 'SC' => 'Santa Catarina',
                             'SP' => 'São Paulo', 'SE' => 'Sergipe', 'TO' => 'Tocantins'
                         ] as $uf => $estado)
-                            <option value="{{ $uf }}" {{ old('state') == $uf ? 'selected' : '' }}>{{ $estado }}</option>
+                            <option value="{{ $uf }}" {{ $client->state == $uf ? 'selected' : '' }}>{{ $estado }}</option>
                         @endforeach
                     </select>
                     @error('state')
@@ -132,6 +133,16 @@
                 </div>
 
                 <ul id="social-network-list" class="space-y-2">
+                    @if ($client->socialNetworks->isNotEmpty())
+                        @foreach($client->socialNetworks as $i => $social_network)
+                            <li class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-xl shadow-sm">
+                                <span>{{ $social_network->name }}: <a href="{{ $social_network->pivot->profile_url }}" target="_blank" class="text-indigo-600 hover:underline">{{ $social_network->pivot->profile_url }}</a></span>
+                                <button type="button" class="text-red-600 font-bold px-2 py-1 hover:bg-red-100 rounded" onclick="this.parentElement.remove()">X</button>
+                                <input type="hidden" name="social_networks[{{ $i }}][id]" value="{{ $social_network->pivot->social_network_id }}">
+                                <input type="hidden" name="social_networks[{{ $i }}][profile_url]" value="{{ $social_network->pivot->profile_url }}">
+                            </li>
+                        @endforeach
+                    @endif
                 </ul>
             </div>
 
@@ -142,8 +153,8 @@
                         class="w-full border-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-5 py-3 text-gray-800 shadow-sm">
                     <option value="">Selecione a origem</option>
                     @foreach($contact_sources as $contact_source)
-                        <option value="{{ $contact_source->id }}" {{ old('role_id') == $contact_source->id ? 'selected' : '' }}>
-                            {{ $contact_source->description }}
+                        <option value="{{ $contact_source->id }}" {{ $client->contact_source_id == $contact_source->id ? 'selected' : '' }}>
+                        {{ $contact_source->description }}
                         </option>
                     @endforeach
                 </select>
@@ -162,15 +173,14 @@
                     </a>
                 </div>
 
-                {{-- Cadastrar Cliente --}}
+                {{-- Atualizar Cadastro --}}
                 <div class="space-x-3">
                     <button type="submit"
                             class="inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:scale-[1.02] cursor-pointer">
-                        Cadastrar Cliente
+                        Atualizar Cadastro
                     </button>
                 </div>
             </div>
-
         </form>
     </div>
 
@@ -205,7 +215,8 @@
         const socialUrl = document.getElementById('social-network-url');
         const socialList = document.getElementById('social-network-list');
 
-        let index = 0;
+        // Controla o índice do array de redes sociais pelo tamanho da lista trazida do banco
+        let index = document.querySelectorAll('#social-network-list li').length;
 
         addSocialBtn.addEventListener('click', () => {
             const networkId = socialSelect.value;
@@ -239,5 +250,6 @@
 
             index++;
         });
-        </script>
+    </script>
 @endsection
+

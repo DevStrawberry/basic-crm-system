@@ -6,23 +6,14 @@
     <div class="w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
         {{-- Cabeçalho --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 space-y-4 md:space-y-0">
-            <h2 class="text-3xl font-extrabold text-gray-900">Usuários</h2>
+            <h2 class="text-3xl font-extrabold text-gray-900">Clientes</h2>
             <div class="flex items-center space-x-3">
                 <span>Filtros: </span>
-                <form method="GET" action="{{ route('clients.index') }}" class="flex items-center space-x-2">
-                    {{-- Campo de busca --}}
-                    <input type="text" name="search" placeholder="Digite nome ou e-mail"
+                <form method="GET" action="{{ route('clients.index') }}" class="flex items-center space-x-2 w-full md:w-auto">
+                {{-- Campo de busca --}}
+                    <input type="text" name="search" placeholder="Digite CPF, nome ou e-mail"
                            value="{{ request('search') }}"
-                           class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
-
-                    {{-- Filtro por status --}}
-                    <select name="status" onchange="this.form.submit()"
-                            class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Status</option>
-                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Ativo</option>
-                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inativo</option>
-                    </select>
-
+                           class="rounded-xl border-gray-300 text-gray-700 text-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-64 min-w-[260px]">
                 </form>
 
                 {{-- Botão adicionar cliente --}}
@@ -53,36 +44,73 @@
         <table class="min-w-full border border-gray-200 rounded-xl overflow-hidden">
             <thead class="bg-gray-50 text-gray-700">
             <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold">CPF</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">Nome</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">E-mail</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">Telefone</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">Data de cadastro</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">Leads ativos</th>
-                <th class="px-6 py-3 text-right text-sm font-semibold">Ações</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold whitespace-nowrap">CPF</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold whitespace-nowrap">Nome</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold whitespace-nowrap">E-mail</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold whitespace-nowrap">Telefone</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold whitespace-nowrap">Leads ativos</th>
+                <th class="px-6 py-3 text-center text-sm font-semibold whitespace-nowrap">Ações</th>
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-gray-800">
             @forelse($clients as $client)
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4">{{ $client->id }}</td>
-                    <td class="px-6 py-4 font-medium">{{ $client->name }}</td>
-                    <td class="px-6 py-4">{{ $client->email }}</td>
-                    <td class="px-6 py-4">{{ $client->phone }}</td>
-                    <td class="px-6 py-4">{{ date_format($client->created_at, 'd/m/y') }}</td>
-                    <td class="px-6 py-4">{{ $client->leads }}</td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <a href="{{ route('clients.show', $client->id) }}"
-                           class="text-yellow-600 hover:text-yellow-800 font-semibold">Visualizar</a>
-                        <a href="{{ route('clients.edit', $client->id) }}"
-                           class="text-yellow-600 hover:text-yellow-800 font-semibold">Editar</a>
-                        <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm('Tem certeza que deseja excluir este cliente? Essa ação não pode ser desfeita')"
-                                    class="text-red-600 hover:text-red-800 font-semibold cursor-pointer">Excluir</button>
-                        </form>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", $client->cpf) }}</td>
+                    <td class="px-6 py-4 font-medium max-w-[220px] truncate">{{ $client->name }}</td>
+                    <td class="px-6 py-4 max-w-[240px] truncate">{{ $client->email }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ preg_replace("/(\d{2})(\d{5})(\d{4})/", "(\$1) \$2-\$3", $client->phone) }}</td>
+                    <td class="px-6 py-4">{{ $client->leads_count }}</td>
+
+                    {{-- Icones de ações --}}
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end space-x-3">
+
+                            {{-- Visualizar --}}
+                            <a href="{{ route('clients.show', $client->id) }}"
+                               class="text-indigo-600 hover:text-indigo-800 cursor-pointer" title="Visualizar">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12
+                         4.5c4.638 0 8.573 3.007 9.963 7.178.07.2.07.422
+                         0 .622C20.577 16.49 16.64 19.5 12
+                         19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </a>
+
+                            {{-- Editar --}}
+                            <a href="{{ route('clients.edit', $client->id) }}"
+                               class="text-yellow-600 hover:text-yellow-800 cursor-pointer" title="Editar">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16.862 4.487l1.687-1.688a2.121 2.121 0 113
+                         3L12 15l-4 1 1-4 7.862-7.513z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M18 14v6H6v-6" />
+                                </svg>
+                            </a>
+
+                            {{-- Excluir --}}
+                            <form action="{{ route('clients.destroy', $client->id) }}" method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                  class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 cursor-pointer" title="Excluir">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                         stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty

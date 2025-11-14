@@ -21,22 +21,25 @@ class UsersController extends Controller
         $query = User::query()->with('role');
         $roles = Role::all();
 
+        // Filtro pelo status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // Filtro pelo perfil
         if ($request->filled('role_id')) {
             $query->where('role_id', $request->role_id);
         }
 
+        // Filtro por nome ou email
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = $request->get('search', "");
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
                 });
         }
-        $users = $query->orderBy('id', 'asc')->paginate(10);
+        $users = $query->orderBy('name', 'asc')->paginate(10);;
 
         return view('admin.users.index', compact('users', 'roles'));
     }
@@ -66,7 +69,7 @@ class UsersController extends Controller
         $params['password'] = Hash::make($password);
 
         // Insere no banco
-        $user = User::create($params);
+        $user = User::query()->create($params);
 
         if($user) {
             // Envia email com usuário e senha aleatória

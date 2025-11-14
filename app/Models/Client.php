@@ -26,7 +26,7 @@ class Client extends Model
         ];
 
     public function owner(): BelongsTo {
-        return $this->belongsTo(User::class, 'owner_user_id');
+        return $this->belongsTo(User::class, 'id', 'owner_user_id');
     }
 
     public function leads(): HasMany {
@@ -34,7 +34,7 @@ class Client extends Model
     }
 
     public function contactSource(): HasOne {
-        return $this->hasOne(ContactSource::class, 'contact_source_id');
+        return $this->hasOne(ContactSource::class, 'id', 'contact_source_id');
     }
 
     public function socialNetworks(): belongsToMany
