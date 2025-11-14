@@ -17,7 +17,7 @@ return new class extends Migration
                 ->constrained('leads')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->foreignId('diagnosed_by')
+            $table->foreignId('diagnosed_by_id')
                 ->constrained('users')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
