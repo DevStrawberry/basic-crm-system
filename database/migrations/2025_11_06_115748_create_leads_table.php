@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->float('estimated_value');
-            $table->boolean('is_won')->default(false);
+            $table->enum('status',['new','on_going', 'completed', 'lost'])->default('new');
             $table->foreignId('client_id')
                 ->constrained('clients')
                 ->onDelete('restrict')
@@ -30,6 +30,7 @@ return new class extends Migration
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->foreignId('lost_reason_id')
+                ->nullable()
                 ->constrained('lost_reasons')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');

@@ -136,7 +136,7 @@
         {{-- Leads --}}
         <div class="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
             <h3 class="text-2xl font-bold mb-4">Leads Cadastradas</h3>
-            @if($leads->isNotEmpty())
+            @if($client->leads->isNotEmpty())
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border border-gray-200 rounded-xl shadow-sm">
                         <thead class="bg-gray-100">
@@ -148,16 +148,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($leads as $lead)
+                        @foreach($client->leads as $lead)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border-b truncate">{{ $lead->title }}</td>
-                                <td class="px-4 py-2 border-b">
-                                    @switch($lead->status)
-                                        @case('new') Nova @break
-                                        @case('on_goind') Em Andamento @break
-                                        @case('completed') Finalizada @break
-                                        @case('lost') Perdida @break
-                                    @endswitch</td>
+                                <td class="px-4 py-2 border-b">{{ $lead->title }}</td>
+                                <td class="px-4 py-2 border-b">{{ $lead->status }}</td>
                                 <td class="px-4 py-2 border-b">{{ $lead->created_at->format('d/m/Y') }}</td>
                                 <td class="px-4 py-2 border-b space-x-2">
                                     <a href="{{ route('leads.show', $lead->id) }}" class="text-indigo-600 hover:underline cursor-pointer">Ver</a>

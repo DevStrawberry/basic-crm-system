@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return strtolower($this->role->name) === 'administrador';
     }
+
+    public function isManager(): bool
+    {
+        return strtolower($this->role->name) === 'gestor';
+    }
 }

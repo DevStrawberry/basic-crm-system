@@ -104,11 +104,14 @@ class ClientsController extends Controller
      */
     public function show(string $id)
     {
-        $client = Client::with(['socialNetworks', 'contactSource', 'leads'])->findOrFail($id);
+        $client = Client::with(['socialNetworks', 'contactSource'])->findOrFail($id);
         $contact_sources = ContactSource::all();
         $social_networks = SocialNetwork::all();
+        $leads = $client->leads()
+            ->with(['owner', 'pipelineStage'])
+            ->paginate(10);
 
-        return view('clients.show', compact('client', 'contact_sources', 'social_networks'));
+        return view('clients.show', compact('client', 'contact_sources', 'social_networks', 'leads'));
     }
 
     /**
