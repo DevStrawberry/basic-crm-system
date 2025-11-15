@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Assinatura de Contrato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste de Assinatura de Contrato</h1>
+        
+        <div class="warning">
+            <strong>⚠️ ATENÇÃO:</strong> Este script deve ser executado após fazer login no sistema. 
+            Você precisa estar autenticado como Gestor ou Assessor.
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ INSTRUÇÕES:</strong>
+            <ol>
+                <li>Faça login no sistema (Gestor ou Assessor)</li>
+                <li>Abra o DevTools (F12) e vá para a aba Console</li>
+                <li>Copie e cole o script JavaScript abaixo</li>
+                <li>Substitua os valores conforme necessário</li>
+                <li>Execute o script</li>
+            </ol>
+        </div>
+
+        <h2>📝 Parâmetros do Teste</h2>
+        <label>Lead ID:</label>
+        <input type="number" id="leadId" value="1" placeholder="ID do Lead">
+        
+        <label>Contract ID:</label>
+        <input type="number" id="contractId" value="1" placeholder="ID do Contrato">
+        
+        <label>Assinado por:</label>
+        <input type="text" id="signedBy" value="Cliente de Teste" placeholder="Nome do signatário">
+        
+        <label>Mover Lead para:</label>
+        <select id="moveLeadStatus">
+            <option value="client">Cliente (Sucesso)</option>
+            <option value="lost">Perdido (Falha)</option>
+            <option value="">Não mover</option>
+        </select>
+
+        <h2>🚀 Script JavaScript para Console</h2>
+        <p>Copie e cole este script no Console do navegador (F12):</p>
+        <div class="code-block" id="scriptOutput"></div>
+        
+        <button onclick="generateScript()">🔄 Gerar Script</button>
+        <button onclick="copyScript()">📋 Copiar Script</button>
+        <button class="danger" onclick="executeTest()">▶️ Executar Teste (Direto)</button>
+
+        <h2>📊 Resultado Esperado</h2>
+        <div class="info">
+            <strong>Fluxo de Sucesso (client):</strong>
+            <ul>
+                <li>✅ Contrato.status = 'Assinado'</li>
+                <li>✅ Contrato.signed_by = valor informado</li>
+                <li>✅ Contrato.signed_at = data/hora atual</li>
+                <li>✅ Lead.is_won = true</li>
+                <li>✅ Lead.pipeline_stage_id = 'Cliente Ativo'</li>
+                <li>✅ PDF gerado e email enviado</li>
+            </ul>
+            
+            <strong>Fluxo de Perda (lost):</strong>
+            <ul>
+                <li>✅ Contrato.status = 'Cancelado'</li>
+                <li>✅ Lead.is_won = false</li>
+                <li>✅ Lead.pipeline_stage_id = 'Cliente Perdido'</li>
+                <li>❌ PDF/Email NÃO são gerados</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function generateScript() {
+            const leadId = document.getElementById('leadId').value;
+            const contractId = document.getElementById('contractId').value;
+            const signedBy = document.getElementById('signedBy').value;
+            const moveLeadStatus = document.getElementById('moveLeadStatus').value;
+            
+            // Obter CSRF token da página atual (se disponível)
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                             document.querySelector('input[name="_token"]')?.value || 
+                             'COLE_O_SEU_TOKEN_AQUI';
+            
+            const script = `/*
+ * SCRIPT DE TESTE: Assinatura de Contrato
+ * Execute este script no Console do navegador (F12)
+ */
+
+// 🚨 SUBSTITUA O TOKEN CSRF SE NECESSÁRIO 🚨
+const csrfToken = '${csrfToken}';
+
+// --- DADOS DA AÇÃO ---
+const leadId = ${leadId};
+const contractId = ${contractId};
+const targetUrl = \`/leads/\${leadId}/contract/\${contractId}/sign\`;
+const signedByValue = '${signedBy}';
+const moveLeadStatus = '${moveLeadStatus || ''}';
+
+// 1. Cria um formulário temporário no DOM
+const form = document.createElement('form');
+form.method = 'POST';
+form.action = targetUrl;
+
+// Função auxiliar para criar campos ocultos
+function createHiddenField(name, value) {
+    const field = document.createElement('input');
+    field.type = 'hidden';
+    field.name = name;
+    field.value = value;
+    return field;
+}
+
+// 2. Adiciona os campos obrigatórios
+form.appendChild(createHiddenField('_token', csrfToken));
+form.appendChild(createHiddenField('signed_by', signedByValue));
+${moveLeadStatus ? `form.appendChild(createHiddenField('move_lead_status', moveLeadStatus));` : ''}
+
+// 3. Envia o formulário
+document.body.appendChild(form);
+form.submit();
+
+console.log('✅ POST enviado para:', targetUrl);
+console.log('📋 Parâmetros:', { signed_by: signedByValue, move_lead_status: '${moveLeadStatus || 'não informado'}' });
+console.log('🔍 Verifique o banco de dados para confirmar as alterações.');`;
+
+            document.getElementById('scriptOutput').textContent = script;
+        }
+
+        function copyScript() {
+            const scriptText = document.getElementById('scriptOutput').textContent;
+            navigator.clipboard.writeText(scriptText).then(() => {
+                alert('✅ Script copiado para a área de transferência!');
+            }).catch(() => {
+                alert('❌ Erro ao copiar. Selecione o texto manualmente.');
+            });
+        }
+
+        function executeTest() {
+            const leadId = document.getElementById('leadId').value;
+            const contractId = document.getElementById('contractId').value;
+            const signedBy = document.getElementById('signedBy').value;
+            const moveLeadStatus = document.getElementById('moveLeadStatus').value;
+            
+            // Obter CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                             document.querySelector('input[name="_token"]')?.value;
+            
+            if (!csrfToken) {
+                alert('❌ Token CSRF não encontrado! Faça login e acesse uma página do sistema primeiro.');
+                return;
+            }
+            
+            const targetUrl = `/leads/${leadId}/contract/${contractId}/sign`;
+            
+            // Criar formulário
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = targetUrl;
+            
+            // Adicionar campos
+            const tokenField = document.createElement('input');
+            tokenField.type = 'hidden';
+            tokenField.name = '_token';
+            tokenField.value = csrfToken;
+            form.appendChild(tokenField);
+            
+            const signedByField = document.createElement('input');
+            signedByField.type = 'hidden';
+            signedByField.name = 'signed_by';
+            signedByField.value = signedBy;
+            form.appendChild(signedByField);
+            
+            if (moveLeadStatus) {
+                const moveField = document.createElement('input');
+                moveField.type = 'hidden';
+                moveField.name = 'move_lead_status';
+                moveField.value = moveLeadStatus;
+                form.appendChild(moveField);
+            }
+            
+            // Enviar
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Gerar script inicial
+        generateScript();
+    </script>
+</body>
+</html>
+
