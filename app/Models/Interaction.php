@@ -13,6 +13,7 @@ class Interaction extends Model
     protected $fillable = [
         'lead_id',
         'client_id',
+        'contract_id',
         'created_by',
         'type',
         'subject',
@@ -26,6 +27,10 @@ class Interaction extends Model
 
     public function client(): BelongsTo {
         return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    public function contract(): BelongsTo {
+        return $this->belongsTo(Contract::class, 'contract_id');
     }
 
     public function createdBy(): BelongsTo {

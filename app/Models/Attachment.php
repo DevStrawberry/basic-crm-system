@@ -11,7 +11,7 @@ class Attachment extends Model
     protected $table = 'attachments';
 
     protected $fillable = [
-        'related_type',
+        'related_table',
         'related_id',
         'filename',
         'file_path',

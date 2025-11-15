@@ -67,6 +67,17 @@ Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->gr
         Route::resource('actives', ActiveClientsController::class);
         Route::resource('losts', LostClientsController::class);
         Route::resource('notes', NotesController::class);
+        
+        // Rotas específicas de contratos
+        Route::post('contract/{contract}/interact', [ContractsController::class, 'interact'])->name('contract.interact');
+        Route::post('contract/{contract}/assign', [ContractsController::class, 'assign'])->name('contract.assign');
+        Route::post('contract/{contract}/sign', [ContractsController::class, 'sign'])->name('contract.sign');
+    });
+
+    // Rotas de contratos (fora do contexto de lead)
+    Route::prefix('contracts')->name('contracts.')->group(function () {
+        Route::get('my-list', [ContractsController::class, 'myList'])->name('my-list');
+        Route::get('all', [ContractsController::class, 'all'])->name('all');
     });
 });
 
