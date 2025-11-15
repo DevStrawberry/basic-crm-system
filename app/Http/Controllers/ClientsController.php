@@ -86,25 +86,13 @@ class ClientsController extends Controller
 
         // Insere as redes sociais na tabela client_social_network
         $social_networks = $request->input('social_networks', []);
+        $this->insertSocialNetworks($client, $social_networks);
 
-        $social_networks_data = array();
-
-        foreach ($social_networks as $social_network) {
-            $social_networks_data[$social_network['id']] = ['profile_url' => $social_network['profile_url']];
-        }
-
-        try {
-            $client->socialNetworks()->sync($social_networks_data);
-        } catch (UniqueConstraintViolationException $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'Erro: redes sociais duplicadas',
-            ]);
-        } catch (Exception $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'Ocorreu um erro ao tentar atualizar as redes sociais do cliente',
-            ]);
+        // Se clicou em "Cadastrar Cliente e Ativar Lead"
+        if ($request->action === "create_and_activate_lead") {
+            return redirect()
+                ->route('leads.create', ['client_id' => $client->id])
+                ->with('success', 'Cliente cadastrado com sucesso');
         }
 
         return redirect()->route('clients.index')
@@ -174,24 +162,13 @@ class ClientsController extends Controller
 
         // Insere as redes sociais na tabela client_social_network
         $social_networks = $request->input('social_networks', []);
-        $social_networks_data = array();
+        $this->insertSocialNetworks($client, $social_networks);
 
-        foreach ($social_networks as $social_network) {
-            $social_networks_data[$social_network['id']] = ['profile_url' => $social_network['profile_url']];
-        }
-
-        try {
-            $client->socialNetworks()->sync($social_networks_data);
-        } catch (UniqueConstraintViolationException $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'Erro: redes sociais duplicadas',
-            ]);
-        } catch (Exception $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'Ocorreu um erro ao tentar atualizar as redes sociais do cliente',
-            ]);
+        // Se clicou em "Atualizar Cadastro e Ativar Lead"
+        if ($request->action === "update_and_activate_lead") {
+            return redirect()
+                ->route('leads.create', ['client_id' => $client->id])
+                ->with('success', 'Cliente cadastrado com sucesso');
         }
 
         return redirect()->route('clients.index')
@@ -217,5 +194,30 @@ class ClientsController extends Controller
 
         return redirect()->route('clients.index')
             ->with('success', 'Cliente excluído com sucesso!');
+    }
+
+    private function insertSocialNetworks(Client $client, $social_networks)
+    {
+        $social_networks_data = array();
+
+        try {
+            if(!empty($social_networks)) {
+                foreach ($social_networks as $social_network) {
+                    $social_networks_data[$social_network['id']] = ['profile_url' => $social_network['profile_url']];
+                }
+
+                $client->socialNetworks()->sync($social_networks_data);
+            }
+        } catch (UniqueConstraintViolationException $exception) {
+            Log::error($exception->getMessage());
+            return back()->withErrors([
+                'error' => 'Erro: redes sociais duplicadas',
+            ]);
+        } catch (Exception $exception) {
+            Log::error($exception->getMessage());
+            return back()->withErrors([
+                'error' => 'Ocorreu um erro ao tentar cadastrar as redes sociais do cliente',
+            ]);
+        }
     }
 }

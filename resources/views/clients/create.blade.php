@@ -165,8 +165,20 @@
                 {{-- Cadastrar Cliente --}}
                 <div class="space-x-3">
                     <button type="submit"
+                            name="action"
+                            value="create"
                             class="inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:scale-[1.02] cursor-pointer">
                         Cadastrar Cliente
+                    </button>
+                </div>
+
+                {{-- Cadastrar Cliente e Ativar Lead --}}
+                <div class="space-x-3">
+                    <button type="submit"
+                            name="action"
+                            value="create_and_activate_lead"
+                            class="inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:scale-[1.02] cursor-pointer">
+                        Cadastrar Cliente e Ativar Lead
                     </button>
                 </div>
             </div>
