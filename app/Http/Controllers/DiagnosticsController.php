@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Diagnostic;
+use App\Models\Lead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -54,6 +55,11 @@ class DiagnosticsController extends Controller
             'lead_id' => $leadId,
             'diagnosed_by_id' => Auth::id(),
         ]);
+
+        $lead = Lead::find($leadId);
+        $lead->pipeline_stage_id = 2;
+        $lead->status = 'on_going';
+        $lead->save();
 
         return redirect()->route('leads.diagnostics.show', ['lead_id' => $leadId, 'diagnostic' => $diagnostic->id])
             ->with('success', 'Diagnóstico registrado com sucesso!');
@@ -127,6 +133,11 @@ class DiagnosticsController extends Controller
         }
 
         $diagnostic->delete();
+
+        $lead = Lead::query()->findOrFail($leadId);
+        $lead->pipeline_stage_id = 1;
+        $lead->status = 'new';
+        $lead->save();
 
         return redirect()->route('leads.diagnostics.index', $leadId)
             ->with('success', 'Diagnóstico excluído com sucesso!');

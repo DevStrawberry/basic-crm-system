@@ -90,7 +90,10 @@ class LeadsController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $lead = Lead::with('client', 'owner', 'pipelineStage',
+            'lostReason', 'diagnostic', 'proposal', 'contract')->findOrFail($id);
+
+        return view('leads.show', compact('lead'));
     }
 
     /**
@@ -98,7 +101,13 @@ class LeadsController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $lead = Lead::with('client', 'owner', 'pipelineStage',
+            'lostReason', 'diagnostic', 'proposal', 'contract')->findOrFail($id);
+        $clients = Client::query()->select('id', 'name')->get();
+        $users = User::query()->select('id', 'name')
+            ->whereNot('role_id', '=', 1)->get();
+
+        return view('leads.edit', compact('lead', 'clients', 'users'));
     }
 
     /**
@@ -106,7 +115,25 @@ class LeadsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'client_id' => 'required',
+            'title' => 'required',
+            'description' => 'required',
+            'estimated_value' => 'required|numeric',
+            'interest_levels' => 'required',
+            'status' => 'required',
+            'pipeline_stage_id' => 'required',
+        ]);
+
+        $lead = Lead::query()->findOrFail($id);
+
+        if($lead->update($validated)) {
+            return redirect()->route('leads.index')
+                ->with('success', 'Lead atualizada com sucesso');
+        };
+
+        return redirect()->route('leads.index')
+            ->withErrors(['error' => 'Erro ao atualizar lead']);
     }
 
     /**
@@ -114,6 +141,9 @@ class LeadsController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $lead = Lead::query()->findOrFail($id);
+        $lead->delete();
+
+        return redirect()->route('leads.index')->with('success', 'Lead excluída com sucesso');
     }
 }

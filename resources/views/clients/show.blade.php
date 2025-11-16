@@ -154,7 +154,7 @@
                                 <td class="px-4 py-2 border-b">
                                     @switch($lead->status)
                                         @case('new') Nova @break
-                                        @case('on_goind') Em Andamento @break
+                                        @case('on_going') Em Andamento @break
                                         @case('completed') Finalizada @break
                                         @case('lost') Perdida @break
                                     @endswitch</td>

@@ -82,7 +82,7 @@
                     <td class="px-6 py-4 max-w-[240px] truncate">
                         @switch($lead->status)
                             @case('new') Nova @break
-                            @case('on_goind') Em Andamento @break
+                            @case('on_going') Em Andamento @break
                             @case('completed') Finalizada @break
                             @case('lost') Perdida @break
                         @endswitch
@@ -125,7 +125,7 @@
 
                             {{-- Excluir --}}
                             <form action="{{ route('leads.destroy', $lead->id) }}" method="POST"
-                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir esta lead? Isso excluirá todos os diagnósticos, propostas, contratos e arquivos relacionados a esta lead. Essa ação não pode ser desfeita')"
                                   class="inline">
                                 @csrf
                                 @method('DELETE')

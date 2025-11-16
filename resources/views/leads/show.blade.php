@@ -1,170 +1,180 @@
 @extends('layouts.app')
 
-@section('title', 'CRM - Visualizar Cliente')
+@section('title', 'CRM - Visualizar Lead')
 
 @section('content')
-    <div class="flex flex-col w-full max-w-2xl mx-auto">
-        <div class="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-10 border border-gray-200 mb-8">
-            <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-10">{{ $client->name }}</h2>
+    <div class="w-full max-w-4xl mx-auto space-y-10">
 
-            {{-- CPF e Nome --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {{-- CARD PRINCIPAL --}}
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
+
+            {{-- Título --}}
+            <h2 class="text-4xl font-extrabold text-center text-gray-900 mb-10 tracking-tight">
+                {{ $lead->title }}
+            </h2>
+
+            <div class="space-y-8">
+                {{-- Descrição --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">CPF</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">
-                        {{ preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $client->cpf) }}
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Descrição</label>
+                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-4 shadow-sm bg-gray-50 leading-relaxed">
+                        {{ $lead->description }}
                     </p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nome</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $client->name }}</p>
-                </div>
-            </div>
+                {{-- Cliente / Responsável --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Cliente</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->client->name }}</p>
+                    </div>
 
-            {{-- Email e Telefone --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">E-mail</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $client->email }}</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Telefone</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">
-                        {{ preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $client->phone) }}
-                    </p>
-                </div>
-            </div>
-
-            {{-- Endereço, Cidade, Estado --}}
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Endereço</label>
-                <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $client->address }}</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $client->city }}</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Responsável</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->owner->name }}</p>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Estado</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $client->state }}</p>
-                </div>
-            </div>
+                {{-- Status / Estágio --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">
+                            @switch($lead->status)
+                                @case('new') Nova @break
+                                @case('on_going') Em andamento @break
+                                @case('completed') Finalizada @break
+                                @case('lost') Perdida @break
+                            @endswitch
+                        </p>
+                    </div>
 
-            {{-- Redes Sociais --}}
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Redes Sociais</label>
-                @if ($client->socialNetworks->isNotEmpty())
-                    <ul class="space-y-2">
-                        @foreach($client->socialNetworks as $social_network)
-                            <li class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-xl shadow-sm">
-                                <span>{{ $social_network->name }}:
-                                    <a href="{{ $social_network->pivot->profile_url }}" target="_blank" class="text-indigo-600 hover:underline">
-                                        {{ $social_network->pivot->profile_url }}
-                                    </a>
-                                </span>
-                            </li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p class="text-gray-500">Nenhuma rede social cadastrada.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Estágio do Pipeline</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->pipelineStage->name }}</p>
+                    </div>
+                </div>
+
+                {{-- Interesse / Data --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nível de Interesse</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->interest_levels }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Data de Cadastro</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->created_at->format('d/m/Y') }}</p>
+                    </div>
+                </div>
+
+                {{-- Valor Estimado --}}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Valor Estimado</label>
+                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">R$ {{ number_format($lead->estimated_value, 2, ',', '.') }}</p>
+                </div>
+
+                {{-- Motivo da perda --}}
+                @if($lead->pipelineStage->name === 'Perdida')
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Motivo da Perda</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->lostReason->description }}</p>
+                    </div>
+                @endif
+
+                {{-- Encerramento --}}
+                @if(!is_null($lead->closed_at))
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Data de Encerramento</label>
+                        <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">{{ $lead->closed_at }}</p>
+                    </div>
                 @endif
             </div>
 
-            {{-- Origem do Contato e Data de Cadastro --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Origem do Contato</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">
-                        {{ $client->contactSource->description }}
-                    </p>
-                </div>
+            {{-- BOTÕES --}}
+            <div class="mt-10 flex flex-wrap justify-between gap-4">
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Data de Cadastro</label>
-                    <p class="w-full border-2 border-gray-300 rounded-xl px-5 py-3 shadow-sm bg-gray-50">
-                        {{ date_format($client->created_at, 'd/m/y') }}
-                    </p>
-                </div>
-            </div>
+                <a href="{{ route('leads.index') }}"
+                   class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-900 font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                    Voltar
+                </a>
 
-            {{-- Botões --}}
-            <div class="flex items-center justify-between mb-3">
-                {{-- Voltar --}}
-                <div class="space-x-3">
-                    <a href="{{ route('clients.index') }}"
-                       class="inline-block mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
-                        Voltar
-                    </a>
-                </div>
+                <a href="{{ route('leads.edit', $lead->id) }}"
+                   class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                    Editar
+                </a>
 
-                {{-- Editar --}}
-                <div class="space-x-3">
-                    <a href="{{ route('clients.edit', $client->id) }}"
-                       class="inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
-                        Editar
-                    </a>
-                </div>
+                <a href="{{ route('leads.losts.create', $lead->id) }}"
+                   class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                    Marcar como Perdida
+                </a>
 
-                {{-- Excluir --}}
-                <div class="space-x-3">
-                    <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                onclick="return confirm('Tem certeza que deseja excluir este cliente?')"
-                                class="inline-block mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
-                            Excluir
-                        </button>
-                    </form>
-                </div>
+                {{-- Botões de mover pipeline --}}
+                @switch($lead->pipeline_stage_id)
+                    @case(1)
+                        <a href="{{ route('leads.diagnostics.create', $lead->id) }}"
+                           class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                            Avançar Pipeline → Diagnóstico
+                        </a>
+                        @break
 
-                {{-- Cadastrar Lead --}}
-                <div class="space-x-3">
-                    <a href="{{ route('leads.create', ['client_id' => $client->id]) }}"
-                       class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
-                        Cadastrar Lead
-                    </a>
-                </div>
+                    @case(2)
+                        <a href="{{ route('leads.proposals.create', $lead->id) }}"
+                           class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                            Avançar Pipeline → Proposta
+                        </a>
+                        @break
+
+                    @case(3)
+                        <a href="{{ route('leads.contracts.create', ['lead_id' => $lead->id]) }}"
+                           class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                            Avançar Pipeline → Contrato
+                        </a>
+                        @break
+
+                    @case(4)
+                        <a href="{{ route('leads.actives.create', ['lead_id' => $lead->id]) }}"
+                           class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                            Tornar Cliente Ativo
+                        </a>
+
+                        <a href="{{ route('leads.losts.create', ['lead_id' => $lead->id]) }}"
+                           class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                            Marcar como Perdida
+                        </a>
+                        @break
+                @endswitch
             </div>
         </div>
 
-        {{-- Leads --}}
-        <div class="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
-            <h3 class="text-2xl font-bold mb-4">Leads Cadastradas</h3>
-            @if($client->leads->isNotEmpty())
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border border-gray-200 rounded-xl shadow-sm">
-                        <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2 border-b">Título</th>
-                            <th class="px-4 py-2 border-b">Status</th>
-                            <th class="px-4 py-2 border-b">Data de Criação</th>
-                            <th class="px-4 py-2 border-b">Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($client->leads as $lead)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border-b">{{ $lead->title }}</td>
-                                <td class="px-4 py-2 border-b">{{ $lead->status }}</td>
-                                <td class="px-4 py-2 border-b">{{ $lead->created_at->format('d/m/Y') }}</td>
-                                <td class="px-4 py-2 border-b space-x-2">
-                                    <a href="{{ route('leads.show', $lead->id) }}" class="text-indigo-600 hover:underline cursor-pointer">Ver</a>
-                                    <a href="{{ route('leads.edit', $lead->id) }}" class="text-green-600 hover:underline cursor-pointer">Editar</a>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <p class="text-gray-500">Nenhuma lead cadastrada para este cliente.</p>
-            @endif
+        {{-- PIPELINE --}}
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
+            <h3 class="text-3xl font-bold mb-6">Pipeline</h3>
+
+            <div class="flex flex-wrap gap-4">
+
+                @if($lead->diagnostic)
+                    <a href="{{ route('leads.diagnostics.show', ['lead_id' => $lead->id, 'diagnostic' => $lead->diagnostic->id]) }}"
+                       class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                        Ver Diagnóstico
+                    </a>
+                @endif
+
+                @if($lead->proposal)
+                    <a href="{{ route('leads.proposals.show', ['lead_id' => $lead->id, 'diagnostic_id' => $lead->diagnostic->id]) }}"
+                       class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                        Ver Proposta
+                    </a>
+                @endif
+
+                @if($lead->contract)
+                    <a href="{{ route('leads.contract.show', ['lead_id' => $lead->id]) }}"
+                       class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                        Ver Contrato
+                    </a>
+                @endif
+            </div>
         </div>
+
     </div>
 @endsection
