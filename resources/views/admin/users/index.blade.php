@@ -104,7 +104,7 @@
 
                             {{-- Excluir --}}
                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
-                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita')"
                                   class="inline">
                                 @csrf
                                 @method('DELETE')

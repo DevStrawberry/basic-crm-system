@@ -60,32 +60,40 @@ class UsersController extends Controller
     {
         $params = $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        // Gera uma senha de 10 caracteres aleatórios
+        // Gera senha aleatória
         $password = Str::random(10);
         $params['password'] = Hash::make($password);
 
-        // Insere no banco
-        $user = User::query()->create($params);
+        // Verifica se já existe (inclusive soft deleted)
+        $user = User::withTrashed()->where('email', $params['email'])->first();
 
-        if($user) {
-            // Envia email com usuário e senha aleatória
-            try {
-                Mail::to($user->email)->send(new UserCreatedMail($user, $password));
-            } catch (\Exception $exception) {
-                Log::log('Error', $exception->getMessage());
-                return back()->withErrors(['error' => 'Falha no envio do e-mail ao usuário']);
+        if ($user) {
+            // Usuário existe e está deletado -> restaurar
+            if ($user->trashed()) {
+                $params['must_change_password'] = true;
+
+                $user->restore();
+                $user->update($params);
             }
+        } else {
+            // Criar novo usuário
+            $user = User::create($params);
+        }
 
-            return redirect()->route('admin.users.index')
-                ->with('success', 'Usuário cadastrado com sucesso');
+        // Envia e-mail
+        try {
+            Mail::to($user->email)->send(new UserCreatedMail($user, $password));
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            return back()->withErrors(['error' => 'Falha no envio do e-mail ao usuário']);
         }
 
         return redirect()->route('admin.users.index')
-            ->withErrors(['error' => 'Erro ao cadastrar usuário']);
+            ->with('success', 'Usuário cadastrado com sucesso!');
     }
 
     /**
