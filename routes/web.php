@@ -72,6 +72,13 @@ Route::middleware(['auth', 'force.password.change', 'role:gestor,assessor'])->gr
         Route::post('contract/{contract}/interact', [ContractsController::class, 'interact'])->name('contract.interact');
         Route::post('contract/{contract}/assign', [ContractsController::class, 'assign'])->name('contract.assign');
         Route::post('contract/{contract}/sign', [ContractsController::class, 'sign'])->name('contract.sign');
+
+        //rotas especificas de propostas
+        Route::get('proposals/{proposal}/pdf', [ProposalsController::class, 'generatePdf'])->name('proposals.pdf');
+        Route::post('proposals/{proposal}/email', [ProposalsController::class, 'sendEmail'])->name('proposals.email');
+        Route::post('proposals/{proposal}/approve', [ProposalsController::class, 'approve'])->name('proposals.approve');
+        Route::post('proposals/{proposal}/reject', [ProposalsController::class, 'reject'])->name('proposals.reject');
+        
     });
 
     // Rotas de contratos (fora do contexto de lead)
