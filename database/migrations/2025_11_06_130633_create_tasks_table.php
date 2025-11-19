@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
+            $table->string('related_table');
+            $table->unsignedBigInteger('related_id');
             $table->foreignId('lead_id')
                 ->constrained('leads')
                 ->onDelete('restrict')

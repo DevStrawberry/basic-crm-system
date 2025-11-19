@@ -13,6 +13,7 @@ class Attachment extends Model
     protected $fillable = [
         'related_table',
         'related_id',
+        'client_id',
         'filename',
         'file_path',
         'content_type',
@@ -21,6 +22,10 @@ class Attachment extends Model
 
     public function uploadedBy(): BelongsTo {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function client(): BelongsTo {
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function related(): morphTo {

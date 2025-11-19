@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('interactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')
-                ->constrained('leads')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+            $table->string('related_table');
+            $table->unsignedBigInteger('related_id');
             $table->foreignId('client_id')
                 ->constrained('clients')
                 ->onDelete('restrict')

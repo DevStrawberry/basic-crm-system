@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('related_table');
             $table->unsignedBigInteger('related_id');
+            $table->foreignId('client_id')
+                ->constrained('clients')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
             $table->string('filename');
             $table->string('file_path');
             $table->string('content_type');

@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Interaction extends Model
 {
     protected $table = 'interactions';
 
     protected $fillable = [
-        'lead_id',
+        'related_table',
+        'related_id',
         'client_id',
         'contract_id',
         'created_by',
@@ -20,10 +22,6 @@ class Interaction extends Model
         'body',
         'happened_at'
     ];
-
-    public function lead(): BelongsTo {
-        return $this->belongsTo(Lead::class, 'lead_id');
-    }
 
     public function client(): BelongsTo {
         return $this->belongsTo(Client::class, 'client_id');
@@ -40,5 +38,9 @@ class Interaction extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'related', 'related_table', 'related_id');
+    }
+
+    public function related(): morphTo {
+        return $this->morphTo(__FUNCTION__, 'related_table', 'related_id');
     }
 }
