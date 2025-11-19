@@ -46,6 +46,16 @@ class Client extends Model
             ->withPivot('profile_url');
     }
 
+    public function interactions(): MorphMany
+    {
+        return $this->morphMany(Interaction::class, 'related', 'related_table', 'related_id');
+    }
+
+    public function tasks(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'related', 'related_table', 'related_id');
+    }
+
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'related', 'related_table', 'related_id');

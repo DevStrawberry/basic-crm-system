@@ -97,7 +97,7 @@
 
                             {{-- Excluir --}}
                             <form action="{{ route('clients.destroy', $client->id) }}" method="POST"
-                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este cliente? Isso excluirá todas as leads relacionadas a esse cliente. Essa operação não pode ser desfeita')"
                                   class="inline">
                                 @csrf
                                 @method('DELETE')
