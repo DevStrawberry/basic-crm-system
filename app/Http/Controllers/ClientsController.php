@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\ContactSource;
+use App\Models\Lead;
 use App\Models\SocialNetwork;
 use Exception;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class ClientsController extends Controller
 {
@@ -54,7 +56,10 @@ class ClientsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'cpf' => 'required',
+            'cpf' => [
+                'required',
+                Rule::unique('clients', 'cpf')->ignore($request->cpf)
+            ],
             'name' => 'required',
             'email' => 'required|email',
             'phone' => 'required',
@@ -69,19 +74,29 @@ class ClientsController extends Controller
         $validated['phone'] = str_replace([' ', '(', ')', '-'], "", $validated['phone']);
         $validated['owner_user_id'] = Auth::id();
 
-        // Insere na tabela client
-        try {
-            $client = Client::query()->create($validated);
-        } catch (UniqueConstraintViolationException $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'CPF já cadastrado',
-            ]);
-        } catch (Exception $exception) {
-            Log::error($exception->getMessage());
-            return back()->withErrors([
-                'error' => 'Ocorreu um erro ao tentar cadastrar o cliente',
-            ]);
+        // Verifica se o client foi excluído (soft deleted)
+        $client = Client::withTrashed()->where('cpf', $validated['cpf'])->first();
+
+        // Se o cliente está soft-deleted => restaurar e fazer o update dos dados
+        if ($client && $client->trashed()) {
+            $client->restore();
+            $client->update($validated);
+
+        // Se for um novo cliente insere na tabela client
+        } else {
+            try {
+                $client = Client::query()->create($validated);
+            } catch (UniqueConstraintViolationException $exception) {
+                Log::error($exception->getMessage());
+                return back()->withErrors([
+                    'error' => 'CPF já cadastrado',
+                ]);
+            } catch (Exception $exception) {
+                Log::error($exception->getMessage());
+                return back()->withErrors([
+                    'error' => 'Ocorreu um erro ao tentar cadastrar o cliente',
+                ]);
+            }
         }
 
         // Insere as redes sociais na tabela client_social_network
@@ -159,20 +174,13 @@ class ClientsController extends Controller
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
             return back()->withErrors([
-                'error' => 'Ocorreu um erro ao tentar cadastrar o cliente',
+                'error' => 'Ocorreu um erro ao tentar atualizar cadastro do cliente',
             ]);
         }
 
         // Insere as redes sociais na tabela client_social_network
         $social_networks = $request->input('social_networks', []);
         $this->insertSocialNetworks($client, $social_networks);
-
-        // Se clicou em "Atualizar Cadastro e Ativar Lead"
-        if ($request->action === "update_and_activate_lead") {
-            return redirect()
-                ->route('leads.create', ['client_id' => $client->id])
-                ->with('success', 'Cliente cadastrado com sucesso');
-        }
 
         return redirect()->route('clients.index')
             ->with('success', 'Cliente atualizado com sucesso!');
@@ -183,10 +191,28 @@ class ClientsController extends Controller
      */
     public function destroy(string $id)
     {
-        $client = Client::with('socialNetworks')->findOrFail($id);
+        $client = Client::with('socialNetworks','leads','tasks','interactions','attachments')->findOrFail($id);
+        $leads = Lead::with('diagnostic', 'proposal','contract','tasks','interactions','attachments')
+                    ->where('client_id', $id)->get();
 
         try {
+            // Apaga o cliente de todas as tabelas relacionadas
             $client->socialNetworks()->detach();
+            $client->tasks()->delete();
+            $client->interactions()->delete();
+            $client->attachments()->delete();
+
+            // Apaga tudo relacionado as leads
+            if($leads->isNotEmpty()) {
+                foreach ($leads as $lead) {
+                    $lead->diagnostic()->delete();
+                    $lead->proposal()->delete();
+                    $lead->contract()->delete();
+                }
+
+                $client->leads()->delete();
+            }
+
             $client->delete();
         } catch (Exception $exception) {
             Log::error($exception->getMessage());

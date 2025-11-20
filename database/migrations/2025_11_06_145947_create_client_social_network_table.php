@@ -22,7 +22,6 @@ return new class extends Migration
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->string('profile_url');
-            $table->timestamps();
         });
     }
 

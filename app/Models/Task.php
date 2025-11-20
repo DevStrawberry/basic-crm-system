@@ -5,12 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Task extends Model
 {
     protected $table = 'tasks';
 
     protected $fillable = [
+        'related_table',
+        'related_id',
         'lead_id',
         'client_id',
         'assigned_to',
@@ -35,5 +38,9 @@ class Task extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'related', 'related_table', 'related_id');
+    }
+
+    public function related(): morphTo {
+        return $this->morphTo(__FUNCTION__, 'related_table', 'related_id');
     }
 }
