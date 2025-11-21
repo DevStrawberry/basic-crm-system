@@ -34,7 +34,8 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Válida Até</label>
-                            <input type="date" name="valid_until" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" value="{{ old('valid_until', $proposal->valid_until->format('Y-m-d')) }}" required>
+                            {{-- CORREÇÃO AQUI: Usando Carbon::parse para garantir que é um objeto de data antes de formatar --}}
+                            <input type="date" name="valid_until" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" value="{{ old('valid_until', \Carbon\Carbon::parse($proposal->valid_until)->format('Y-m-d')) }}" required>
                         </div>
                     </div>
 
