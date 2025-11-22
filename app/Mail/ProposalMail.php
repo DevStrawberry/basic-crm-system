@@ -15,13 +15,10 @@ class ProposalMail extends Mailable
     use Queueable, SerializesModels;
 
     private Proposal $proposal;
-    private $pdfContent;
+    private $pdfContent; // Pode ser null
 
-    /**
-     * Create a new message instance.
-     * Recebe o conteúdo do PDF em memória (string binária) para não precisar salvar em disco antes.
-     */
-    public function __construct(Proposal $proposal, $pdfContent)
+    // Agora o pdfContent é opcional (= null)
+    public function __construct(Proposal $proposal, $pdfContent = null)
     {
         $this->proposal = $proposal;
         $this->pdfContent = $pdfContent;
@@ -37,13 +34,18 @@ class ProposalMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.proposal', // View simples com o texto do email
+            view: 'emails.proposal', 
             with: ['proposal' => $this->proposal],
         );
     }
 
     public function attachments(): array
     {
+        // Se não tiver conteúdo de PDF, não anexa nada
+        if (!$this->pdfContent) {
+            return [];
+        }
+
         return [
             Attachment::fromData(fn () => $this->pdfContent, 'Proposta_' . $this->proposal->id . '.pdf')
                 ->withMime('application/pdf'),

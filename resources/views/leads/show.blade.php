@@ -161,7 +161,8 @@
                 @endif
 
                 @if($lead->proposal)
-                    <a href="{{ route('leads.proposals.show', ['lead_id' => $lead->id, 'diagnostic_id' => $lead->diagnostic->id]) }}"
+                    {{-- CORREÇÃO: 'diagnostic_id' -> 'proposal', e usando ID da proposta --}}
+                    <a href="{{ route('leads.proposals.show', ['lead_id' => $lead->id, 'proposal' => $lead->proposal->id]) }}"
                        class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
                         Ver Proposta
                     </a>
@@ -174,6 +175,73 @@
                     </a>
                 @endif
             </div>
+        </div>
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-3xl font-bold text-gray-800">Propostas da Lead</h3>
+                <a href="{{ route('leads.proposals.create', $lead) }}"
+                   class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                    + Nova Proposta
+                </a>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-200">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-3xl font-bold text-gray-800">Proposta da Lead</h3>
+                {{-- Se a proposta NÃO existir, mostra o botão de criar --}}
+                @if(!$lead->proposal)
+                <a href="{{ route('leads.proposals.create', $lead) }}"
+                   class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer">
+                    + Nova Proposta
+                </a>
+                @endif
+            </div>
+
+            {{-- Se a proposta JÁ EXISTE, mostra a tabela com uma linha --}}
+            @if($lead->proposal)
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border border-gray-200 rounded-xl shadow-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 border-b font-semibold text-gray-700">Título</th>
+                                <th class="px-4 py-3 border-b font-semibold text-gray-700">Assessor</th>
+                                <th class="px-4 py-3 border-b font-semibold text-gray-700">Valor</th>
+                                <th class="px-4 py-3 border-b font-semibold text-gray-700">Status</th>
+                                <th class="px-4 py-3 border-b font-semibold text-gray-700">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- Sem @foreach, pois é apenas um item --}}
+                            @php
+                                $proposal = $lead->proposal; // Apenas para facilitar a leitura
+                            @endphp
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 border-b">{{ $proposal->title }}</td>
+                                <td class="px-4 py-3 border-b">{{ $proposal->assessor->name ?? 'N/A' }}</td>
+                                <td class="px-4 py-3 border-b">R$ {{ number_format($proposal->total_value, 2, ',', '.') }}</td>
+                                <td class="px-4 py-3 border-b">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        @if($proposal->status == 'Enviada') bg-blue-100 text-blue-800
+                                        @elseif($proposal->status == 'Aceita') bg-green-100 text-green-800
+                                        @elseif($proposal->status == 'Rejeitada') bg-red-100 text-red-800
+                                        @else bg-gray-200 text-gray-800 @endif">
+                                        {{ $proposal->status }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 border-b space-x-3">
+                                    <a href="{{ route('leads.proposals.show', ['lead_id' => $lead->id, 'proposal' => $proposal->id]) }}" class="text-indigo-600 hover:underline">Ver</a>
+                                    @if($proposal->status === 'Draft')
+                                        <a href="{{ route('leads.proposals.edit', ['lead_id' => $lead->id, 'proposal' => $proposal->id]) }}" class="text-green-600 hover:underline">Editar</a>
+                                    @endif
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                {{-- Se a proposta NÃO existir, mostra a mensagem --}}
+                <p class="text-gray-500 text-center">Nenhuma proposta cadastrada para esta lead.</p>
+            @endif
         </div>
 
     </div>

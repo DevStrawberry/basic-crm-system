@@ -6,7 +6,7 @@ use App\Mail\ProposalMail;
 use App\Models\Lead;
 use App\Models\PipelineStage;
 use App\Models\Proposal;
-use Barryvdh\DomPDF\Facade\Pdf; // Certifique-se de ter o dompdf instalado
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Mail;
 
 class ProposalsController extends Controller
 {
-    /**
-     * Listar propostas de um lead específico.
-     */
     public function index(string $leadId)
     {
         $lead = Lead::findOrFail($leadId);
@@ -28,17 +25,11 @@ class ProposalsController extends Controller
         return view('proposals.index', compact('lead', 'proposals', 'leadId'));
     }
 
-    /**
-     * Formulário de criação.
-     */
     public function create(string $leadId)
     {
         return view('proposals.create', compact('leadId'));
     }
 
-    /**
-     * Salvar nova proposta.
-     */
     public function store(Request $request, string $leadId)
     {
         $validated = $request->validate([
@@ -46,19 +37,19 @@ class ProposalsController extends Controller
             'service_description' => 'required|string',
             'total_value' => 'required|numeric|min:0',
             'valid_until' => 'required|date|after_or_equal:today',
-            'warranties' => 'required|string', // Conforme sua migration (not nullable)
+            'warranties' => 'required|string',
             'notes' => 'nullable|string',
         ]);
 
         try {
             Proposal::create([
                 'lead_id' => $leadId,
-                'created_by' => Auth::id(), // Campo obrigatório na migration
-                'status' => 'Draft', // Default da migration
+                'created_by' => Auth::id(),
+                'status' => 'Draft',
                 ...$validated
             ]);
 
-            return redirect()->route('leads.proposals.index', $leadId)
+            return redirect()->route('leads.proposals.index', ['lead_id' => $leadId])
                 ->with('success', 'Proposta gerada com sucesso!');
 
         } catch (\Exception $e) {
@@ -67,9 +58,6 @@ class ProposalsController extends Controller
         }
     }
 
-    /**
-     * Exibir detalhes da proposta.
-     */
     public function show(string $leadId, string $proposalId)
     {
         $proposal = Proposal::with(['lead.client', 'createdBy'])
@@ -79,23 +67,17 @@ class ProposalsController extends Controller
         return view('proposals.show', compact('proposal', 'leadId'));
     }
 
-    /**
-     * Editar proposta (Apenas se status for Draft).
-     */
     public function edit(string $leadId, string $proposalId)
     {
         $proposal = Proposal::where('lead_id', $leadId)->findOrFail($proposalId);
 
         if ($proposal->status !== 'Draft') {
-            return back()->with('error', 'Apenas propostas em rascunho (Draft) podem ser editadas.');
+            return back()->withErrors(['error' => 'Apenas propostas em rascunho (Draft) podem ser editadas.']);
         }
 
         return view('proposals.edit', compact('proposal', 'leadId'));
     }
 
-    /**
-     * Atualizar proposta.
-     */
     public function update(Request $request, string $leadId, string $proposalId)
     {
         $proposal = Proposal::where('lead_id', $leadId)->findOrFail($proposalId);
@@ -115,25 +97,19 @@ class ProposalsController extends Controller
 
         $proposal->update($validated);
 
-        return redirect()->route('leads.proposals.show', [$leadId, $proposalId])
+        return redirect()->route('leads.proposals.show', ['lead_id' => $leadId, 'proposal' => $proposalId])
             ->with('success', 'Proposta atualizada com sucesso!');
     }
 
-    /**
-     * Deletar (Soft Delete).
-     */
     public function destroy(string $leadId, string $proposalId)
     {
         $proposal = Proposal::where('lead_id', $leadId)->findOrFail($proposalId);
         $proposal->delete();
 
-        return redirect()->route('leads.proposals.index', $leadId)
+        return redirect()->route('leads.proposals.index', ['lead_id' => $leadId])
             ->with('success', 'Proposta excluída.');
     }
 
-    /**
-     * RF19: Gerar PDF.
-     */
     public function generatePdf(string $leadId, string $proposalId)
     {
         $proposal = Proposal::with(['lead.client', 'createdBy'])->where('lead_id', $leadId)->findOrFail($proposalId);
@@ -144,49 +120,44 @@ class ProposalsController extends Controller
     }
 
     /**
-     * RF20 e RF21: Enviar por E-mail e Atualizar Status.
+     * Envio de Email SIMPLIFICADO (Sem PDF por enquanto)
      */
     public function sendEmail(string $leadId, string $proposalId)
     {
-        $proposal = Proposal::with(['lead.client'])->where('lead_id', $leadId)->findOrFail($proposalId);
+        $proposal = Proposal::with(['lead.client', 'createdBy'])->where('lead_id', $leadId)->findOrFail($proposalId);
         $clientEmail = $proposal->lead->client->email;
 
         if (!$clientEmail) {
-            return back()->with('error', 'O cliente deste Lead não possui e-mail cadastrado.');
+            return back()->withErrors(['error' => 'O cliente deste Lead não possui e-mail cadastrado.']);
         }
 
         try {
-            // Gera o PDF em memória
-            $pdf = Pdf::loadView('proposals.pdf', compact('proposal'));
+            // TEMP: Comentei a geração do PDF para teste
+            // $pdf = Pdf::loadView('proposals.pdf', compact('proposal'));
+            // $pdfContent = $pdf->output();
 
-            // Envia o email
-            Mail::to($clientEmail)->send(new ProposalMail($proposal, $pdf->output()));
+            // Passamos null no lugar do conteúdo do PDF
+            Mail::to($clientEmail)->send(new ProposalMail($proposal, null));
 
-            // RF21: Atualiza status e data de envio
             $proposal->update([
                 'status' => 'Enviada',
                 'sent_at' => now(),
             ]);
 
-            return back()->with('success', 'Proposta enviada por e-mail com sucesso!');
+            return back()->with('success', 'Proposta enviada por e-mail com sucesso! (Sem anexo)');
 
         } catch (\Exception $e) {
             Log::error('Erro no envio de proposta: ' . $e->getMessage());
-            return back()->with('error', 'Falha ao enviar e-mail. Consulte o log.');
+            return back()->withErrors(['error' => 'Falha no envio do e-mail. Verifique o log.']);
         }
     }
 
-    /**
-     * RF22: Aprovar Proposta -> Move Lead para Assinatura de Contrato.
-     */
     public function approve(string $leadId, string $proposalId)
     {
         $proposal = Proposal::where('lead_id', $leadId)->findOrFail($proposalId);
         
-        // 1. Atualiza status da proposta
         $proposal->update(['status' => 'Aceita']);
 
-        // 2. Tenta mover a Lead para o estágio de Contrato
         $contractStage = PipelineStage::where('name', 'LIKE', '%Contrato%')
             ->orWhere('name', 'LIKE', '%Assinatura%')
             ->first();
@@ -195,22 +166,16 @@ class ProposalsController extends Controller
             $proposal->lead->update(['pipeline_stage_id' => $contractStage->id]);
         }
 
-        // Redireciona para criação de contrato (fluxo sugerido pelo seu guia)
-        return redirect()->route('leads.contract.create', $leadId)
+        return redirect()->route('leads.contract.create', ['lead_id' => $leadId])
             ->with('success', 'Proposta Aprovada! Lead movido para fase de Contrato.');
     }
 
-    /**
-     * RF22: Rejeitar Proposta -> Move Lead para Perdidos.
-     */
     public function reject(string $leadId, string $proposalId)
     {
         $proposal = Proposal::where('lead_id', $leadId)->findOrFail($proposalId);
 
-        // 1. Atualiza status da proposta
         $proposal->update(['status' => 'Rejeitada']);
 
-        // 2. Tenta mover a Lead para estágio Perdido
         $lostStage = PipelineStage::where('name', 'LIKE', '%Perdido%')
              ->orWhere('name', 'LIKE', '%Lost%')
              ->first();
@@ -218,7 +183,7 @@ class ProposalsController extends Controller
         if ($lostStage) {
             $proposal->lead->update([
                 'pipeline_stage_id' => $lostStage->id,
-                'status' => 'lost', // Campo de controle geral
+                'status' => 'lost',
                 'is_won' => false,
                 'closed_at' => now()
             ]);
